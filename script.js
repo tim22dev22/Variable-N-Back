@@ -80,7 +80,7 @@ imageNames.forEach(name => {
     preloadedImages[name] = img;
 });
 
-const colorStimuli = ['red', 'green', 'blue', 'yellow', 'cyan'];
+const colorStimuli = ['red', 'green', 'blue', 'yellow', 'cyan', 'lime', 'magenta', 'orange'];
 
 const isLocalFile = location.protocol === 'file:';
 const audioNames = ['c','h','k','l','q','r','s','t'];
