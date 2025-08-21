@@ -28,7 +28,7 @@ matchRateSlider.addEventListener("input", () => {
   matchRateLabel.textContent = ""+matchRateSlider.value+"%";
 });
 
-
+const toggleAdaptive = document.getElementById("toggleAdaptive");
 const toggleImage = document.getElementById("toggleImage");
 const toggleColor = document.getElementById("toggleColor");
 const toggleAudio = document.getElementById("toggleAudio");
@@ -141,6 +141,7 @@ let n = 2;
 let trialDelay;
 let matchRate;
 let interference;
+let adaptive;
 
 const buttonMap = {
   positionBtn: "position",
@@ -227,6 +228,7 @@ function displayStats(){
     percentage = (totalNumerator*100 / totalDenominator).toFixed(0) + "%";
   }
   scoreLabel.textContent="score: "+percentage;
+  headerText.textContent = `n = ${nInput.value}`;
 }
 
 function chooseStimuli(trialCount, type, length){
@@ -258,17 +260,31 @@ function chooseStimuli(trialCount, type, length){
   return num;
 }
 
+function chooseRandomN(){
+  totalWeight = maxN * (maxN+1) /2;
+
+  num = Math.floor(Math.random()*totalWeight);
+  for (let i = 1; i <= maxN; i++) {
+    lower = i* (i-1)/2; //inclusive
+    higher = i *(i+1)/2; //exclusive
+    if (num >= lower && num < higher){
+      return i;
+    }
+  }
+}
+
 playTerminated=false;
 
 async function play(numTrials){
   if (isPlaying){
     return;
   }
-  n = nInput.value;
-  maxN = nInput.value;
+  n = Number(nInput.value);
+  maxN = Number(nInput.value);
   interference=interferenceSlider.value;
   trialDelay=delaySlider.value;
   matchRate=matchRateSlider.value;
+  adaptive=toggleAdaptive.checked;
   //reset scores
   activeStimuli=['position'];
   if (toggleImage.checked) activeStimuli.push('image');
@@ -294,8 +310,10 @@ async function play(numTrials){
       playTerminated=false;
       break;
     }
-    n=Math.floor(Math.random()*maxN)+1;
-    headerText.textContent = `n = ${n}`;
+    if (adaptive){
+      n=chooseRandomN();
+      headerText.textContent = `n = ${n}`;
+    }
 
     const position = chooseStimuli(trialCount, "position", gridSize*gridSize);
 
