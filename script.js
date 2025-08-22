@@ -228,6 +228,7 @@ function displayStats(){
     percentage = (totalNumerator*100 / totalDenominator).toFixed(0) + "%";
   }
   scoreLabel.textContent="score: "+percentage;
+  headerText.textContent="";//for mobile
   headerText.textContent = `n = ${nInput.value}`;
 }
 
@@ -298,7 +299,8 @@ async function play(numTrials){
 
   for (const type of stimuliTypes) {
     const btn = document.getElementById(type+"Btn");
-    btn.innerHTML=type.charAt(0).toUpperCase() + type.slice(1);
+    btn.textContent="";//for mobile
+    btn.textContent=type.charAt(0).toUpperCase() + type.slice(1);
   }
   scoreLabel.textContent="score: ";
 
