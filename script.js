@@ -80,7 +80,17 @@ imageNames.forEach(name => {
     preloadedImages[name] = img;
 });
 
-const colorStimuli = ['red', 'green', 'blue', 'yellow', 'cyan', 'lime', 'magenta', 'orange'];
+//const colorStimuli = ['red', 'green', 'blue', 'yellow', 'cyan', 'lime', 'magenta', 'orange'];
+const colorStimuli = [
+  'rgb(200, 60, 60)',   // muted red
+  'rgb(60, 160, 60)',   // muted green
+  'rgb(60, 100, 200)',  // muted blue
+  'rgb(200, 180, 60)',  // muted yellow
+  'rgb(60, 180, 180)',  // muted cyan
+  'rgb(120, 200, 60)',  // muted lime
+  'rgb(180, 60, 180)',  // muted magenta
+  'rgb(200, 120, 60)'   // muted orange
+];
 
 const isLocalFile = location.protocol === 'file:';
 const audioNames = ['c','h','k','l','q','r','s','t'];
@@ -318,8 +328,9 @@ async function play(numTrials){
     }
 
     const position = chooseStimuli(trialCount, "position", gridSize*gridSize);
-
-    highlightCell(position);
+    if (!activeStimuli.includes("color")){
+      highlightCell(position);
+    }
     const stimuli = {position: position};
 
     for (const stim of activeStimuli) {
@@ -336,6 +347,7 @@ async function play(numTrials){
          const color = chooseStimuli(trialCount, "color", colorStimuli.length);
          cells[position].overlay.style.backgroundColor = colorStimuli[color];
          stimuli.color=color;
+         cells[position].cell.style.backgroundColor=colorStimuli[color];
       }
       else if (stim === "audio") {
          const audio = chooseStimuli(trialCount, "audio", audioNames.length);
@@ -414,6 +426,9 @@ function endOfTrialCheck() {
   });
 }
 function handleButtonPress(type, btn) {
+  if (!activeStimuli.includes(type)){
+    return;
+  }
   if (currentSequence.length > n) {
     userPressed[type] = true;
     const last = currentSequence[currentSequence.length - 1][type];
