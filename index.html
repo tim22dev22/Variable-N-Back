@@ -8,19 +8,25 @@
 </head>
 <body>
 
-
+  <button id="menuToggle">≡</button>
   <div id="sideMenu">
-    <button id="menuToggle">⚙️</button>
     <div id="menuContent">
+      <br>
+      <label>
+        <input type="checkbox" id="toggleDarkMode" class="setting">
+        Dark Mode
+      </label><br>
       <label for="numTrialsInput">Number of Trials:</label>
-      <input type="number" id="numTrialsInput" class="setting" min="1" max="100" value="30"><br><br>
+      <input type="number" id="numTrialsInput" class="setting" min="1" max="100" value="30"><br>
       <label for="nInput">N-back Level:</label>
       <input type="number" id="nInput" class="setting" min="1" max="15" value="2">
       <br>
       <label>
         <input type="checkbox" id="toggleAdaptive" class="setting">
         Adaptive
-      </label><br>
+      </label><br><br>
+      <label for="adaptiveMinimum">Minimum N (Adaptive mode only)</label><br>
+      <input type="number" id="adaptiveMinimum" class="setting" min="1" max="10" value="1"><br>
       <label>
         <input type="checkbox" id="toggleImage" class="setting">
         Image Stimuli
@@ -44,6 +50,9 @@
       <label for="matchRateSlider">Match Rate:</label>
       <input type="range" id="matchRateSlider" class="setting" min="0" max="100" value="20" step="5">
       <span id="matchRateLabel">20%</span>
+      <br>
+      <button id="resetSettings">Reset Settings to Default</button>
+
     </div>
   </div>
 

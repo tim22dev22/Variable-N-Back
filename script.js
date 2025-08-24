@@ -3,10 +3,12 @@ const startBtn = document.getElementById("startBtn");
 const scoreLabel = document.getElementById("scoreLabel");
 
 const numTrialsInput = document.getElementById("numTrialsInput");
+const adaptiveMinInput = document.getElementById("adaptiveMinimum");
 
 const menuToggle = document.getElementById("menuToggle");
 const sideMenu = document.getElementById("sideMenu");
 const headerText = document.getElementById("headerText");
+const darkModeToggle = document.getElementById("toggleDarkMode");
 
 const interferenceSlider = document.getElementById("interferenceSlider");
 const interferenceLabel = document.getElementById("interferenceLabel");
@@ -32,12 +34,12 @@ const toggleAdaptive = document.getElementById("toggleAdaptive");
 const toggleImage = document.getElementById("toggleImage");
 const toggleColor = document.getElementById("toggleColor");
 const toggleAudio = document.getElementById("toggleAudio");
-const originalColor='lightgray';
+//const originalColor='lightgray';
 const incorrectColor='#FF0000';
 const correctColor='#00FF00';
 const missedColor='#FFFF00';
 const cellColor='rgb(238, 238, 238)';
-const cellHighlightColor='black';
+const cellHighlightColor = {true: 'lightgray', false: 'black'};
 
 
 audioFolder="audio/letters/";
@@ -152,6 +154,7 @@ let trialDelay;
 let matchRate;
 let interference;
 let adaptive;
+let adaptiveMin;
 
 const buttonMap = {
   positionBtn: "position",
@@ -196,14 +199,14 @@ function addTrial(stimuli) {
 
 function cleanCells(){
   for (const cell of cells) {
-    cell.cell.style.backgroundColor=cellColor;
+    cell.cell.style.backgroundColor="";
     cell.img.src = "";
     cell.overlay.style.backgroundColor = "transparent";
   }
 }
 
 function highlightCell(chosenCell) {
-  cells[chosenCell].cell.style.backgroundColor=cellHighlightColor;
+  cells[chosenCell].cell.style.backgroundColor=cellHighlightColor[darkModeToggle.checked];
   
 }
 
@@ -272,15 +275,17 @@ function chooseStimuli(trialCount, type, length){
 }
 
 function chooseRandomN(){
-  totalWeight = maxN * (maxN+1) /2;
-
+  //totalWeight = maxN * (maxN+1) /2; //adaptiveMin ... maxN
+  totalWeight = (maxN+adaptiveMin)*(maxN-adaptiveMin+1)/2;
   num = Math.floor(Math.random()*totalWeight);
-  for (let i = 1; i <= maxN; i++) {
-    lower = i* (i-1)/2; //inclusive
-    higher = i *(i+1)/2; //exclusive
+  lower = 0;//inclusive
+  for (let i = adaptiveMin; i <= maxN; i++) {
+    //lower = i* (i-1)/2; //inclusive
+    higher = lower+i; //exclusive
     if (num >= lower && num < higher){
       return i;
     }
+    lower = higher;
   }
 }
 
@@ -296,6 +301,9 @@ async function play(numTrials){
   trialDelay=delaySlider.value;
   matchRate=matchRateSlider.value;
   adaptive=toggleAdaptive.checked;
+  if (adaptive){
+    adaptiveMin=Number(adaptiveMinInput.value);
+  }
   //reset scores
   activeStimuli=['position'];
   if (toggleImage.checked) activeStimuli.push('image');
@@ -404,7 +412,7 @@ function endOfTrialCheck() {
 
   activeStimuli.forEach(type => {
 
-    document.getElementById(type+"Btn").style.backgroundColor=originalColor;
+    document.getElementById(type+"Btn").style.backgroundColor="";
     const isMatch = last[type] === nBack[type];
     const pressed = userPressed[type]; // e.g., { position: true, audio: false, ... }
 
@@ -414,7 +422,7 @@ function endOfTrialCheck() {
       stimuliScores[type].missed++;
       document.getElementById(type+"Btn").style.backgroundColor=missedColor;
       setTimeout(() => {
-        document.getElementById(type+"Btn").style.backgroundColor=originalColor;
+        document.getElementById(type+"Btn").style.backgroundColor="";
       }, trialDelay/3);
 
     } else if (!isMatch && userPressed[type]) {
@@ -499,31 +507,35 @@ startBtn.addEventListener("click", async () => {
   }
   
   if (!isPlaying){
-    waitingForAudio=true;
     const numTrials = parseInt(numTrialsInput.value);
 
     if (isNaN(numTrials) || numTrials < 1) {
       alert("Please enter a valid number of trials (1 or more).");
       return; // stop starting the game
     }
-  if (!isLocalFile){
-    await Howler.ctx.resume();
-    audioNames.forEach(name => {
-      const sound = audioElements[name];
-      if (!sound) return;
-  
-      // play muted and wait for first 'play' event
-      const id = sound.play();
-      sound.volume(0, id);
-  
-      // Once the sound starts playing, pause and reset
-      sound.once('play', () => {
-        sound.pause(id);
-        sound.seek(0, id);
-        sound.volume(0.7, id); // restore normal volume
+    if (parseInt(adaptiveMinInput.value) > parseInt(nInput.value)){
+      alert("The adaptive minimum is higher than the n level");
+      return; // stop starting the game
+    }
+    waitingForAudio=true;
+    if (!isLocalFile){
+      await Howler.ctx.resume();
+      audioNames.forEach(name => {
+        const sound = audioElements[name];
+        if (!sound) return;
+    
+        // play muted and wait for first 'play' event
+        const id = sound.play();
+        sound.volume(0, id);
+    
+        // Once the sound starts playing, pause and reset
+        sound.once('play', () => {
+          sound.pause(id);
+          sound.seek(0, id);
+          sound.volume(0.7, id); // restore normal volume
+        });
       });
-    });
-  }
+    }
 
     waitingForAudio=false;
     play(numTrials);
@@ -538,6 +550,11 @@ startBtn.addEventListener("click", async () => {
 
 menuToggle.addEventListener("click", () => {
   sideMenu.classList.toggle("expanded");
+  if (sideMenu.classList.contains("expanded")) {
+    menuToggle.style.left = sideMenu.offsetWidth + "px"; // move next to menu
+  } else {
+    menuToggle.style.left = "0px";
+  }
 });
 
 
@@ -551,6 +568,29 @@ document.querySelectorAll("button").forEach(btn => {
     e.preventDefault();
   });
 });
+
+darkModeToggle.addEventListener("input", () => {
+  if (darkModeToggle.checked){
+    document.body.classList.add("dark-mode");
+  }
+  else{
+    document.body.classList.remove("dark-mode");
+  }
+});
+
+const defaultSettings = {
+  numTrialsInput: 30,
+  //nInput: 2,
+  toggleAdaptive: false,
+  adaptiveMinimum: 1,
+  /*toggleImage: false,
+  toggleColor: false,
+  toggleAudio: false,*/
+  interferenceSlider: 20,
+  delaySlider: 2500,
+  matchRateSlider: 20,
+  //darkModeToggle: false
+};
 
 const prefix="adaptivenback_";
 function saveSettings() {
@@ -577,10 +617,28 @@ function loadSettings() {
   interferenceSlider.dispatchEvent(new Event("input"));
   delaySlider.dispatchEvent(new Event("input"));
   matchRateSlider.dispatchEvent(new Event("input"));
+  darkModeToggle.dispatchEvent(new Event("input"));
 }
 
 document.querySelectorAll(".setting").forEach(el => {
   el.addEventListener("change", saveSettings);
 });
+
+
+const resetBtn = document.getElementById("resetSettings");
+
+resetBtn.addEventListener("click", () => {
+
+  Object.keys(defaultSettings).forEach(id => {
+    const value = defaultSettings[id];
+    if (typeof value === 'boolean') {
+      localStorage.setItem(prefix + id, value.toString());
+    } else {
+      localStorage.setItem(prefix + id, value);
+    }
+  });
+  loadSettings();
+});
+
 
 window.addEventListener("load", loadSettings);

@@ -13,13 +13,26 @@ body {
   margin: 0;
   padding: 0;
 }
+
+
+/* dark mode */
+body.dark-mode {
+  background: #252525;
+  color: #DDDDDD;
+}
 button {
   font-size: 16px;
   border-radius: 0px;
   border: none;
   cursor: pointer;
   margin: 5px;
+  background-color: lightgray;
+  color: black;
   -webkit-tap-highlight-color: transparent; /* remove default tap highlight */
+}
+body.dark-mode button {
+  background-color: #333333; /* dark gray */
+  color: #f0f0f0;            /* light text */
 }
 button:active {
   background-color: inherit; /* or whatever your normal background is */
@@ -74,11 +87,12 @@ button:active {
   width: 200px;        /* final width */
   /*background-color: #f0f0f0;*/
   overflow-x: visible;
+  overflow-y: auto;
   transition: left 0.3s; /* slide in/out */
   /*padding: 10px;*/
   /*box-shadow: 2px 0 5px rgba(0,0,0,0.2);*/
   z-index: 1000;        /* above main content */
-  background-color: wheat;
+  background-color: gray;
 }
 
 #sideMenu.expanded {
@@ -86,16 +100,21 @@ button:active {
 }
 
 #menuToggle {
-  position: absolute;
-  top: 10px;
+  position: fixed;
+  /*top: 10px;
   right: 0;   /* sticks to the right edge */
-  transform: translateX(100%);
+  top: 10px;              /* vertical position */
+  left: 0;            /* initial horizontal position, next to menu */
+  padding: 0;
+  margin: 0;
   width: 10vw;
   height: 10vh;
   background: #444;
   color: white;
   border: none;
   cursor: pointer;
+  z-index: 1001;
+  transition: left 0.3s;  /* animate along with menu */
 }
 
 #menuContent {
@@ -134,6 +153,10 @@ button:active {
   transition: none;
   position: relative;
 }
+body.dark-mode .cell {
+  background-color: rgb(60, 60, 60); /* dark gray */
+}
+
 .cell-image {
   position: absolute;
   top: 50%;
@@ -180,4 +203,7 @@ button:hover {
   align-items: center;
   transition: none;
   background-color: lightgray;
+}
+body.dark-mode #stimuliButtons button {
+  background-color: #333333;  /* dark gray */
 }
