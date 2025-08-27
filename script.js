@@ -40,6 +40,14 @@ const correctColor='#00FF00';
 const missedColor='#FFFF00';
 const cellColor='rgb(238, 238, 238)';
 const cellHighlightColor = {true: 'lightgray', false: 'black'};
+function hexToRgbString(hex) {
+  hex = hex.replace(/^#/, "");
+  if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
+  const r = parseInt(hex.substr(0,2), 16);
+  const g = parseInt(hex.substr(2,2), 16);
+  const b = parseInt(hex.substr(4,2), 16);
+  return `rgb(${r}, ${g}, ${b})`;
+}
 
 
 audioFolder="audio/letters/";
@@ -420,9 +428,13 @@ function endOfTrialCheck() {
       stimuliScores[type].correct++;
     } else if (isMatch && !userPressed[type]) {
       stimuliScores[type].missed++;
-      document.getElementById(type+"Btn").style.backgroundColor=missedColor;
+      btn = document.getElementById(type+"Btn")
+      btn.style.backgroundColor=missedColor;
       setTimeout(() => {
-        document.getElementById(type+"Btn").style.backgroundColor="";
+        //(document.getElementById(type+"Btn").style.backgroundColor==missedColor){
+        if (getComputedStyle(btn).backgroundColor === hexToRgbString(missedColor)){
+          document.getElementById(type+"Btn").style.backgroundColor="";
+        }
       }, trialDelay/3);
 
     } else if (!isMatch && userPressed[type]) {
